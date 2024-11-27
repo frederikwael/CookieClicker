@@ -100,6 +100,16 @@ namespace CookieClicker
             // Update cookie count text
             CookieCountText.Text = $"Cookies: {cookieCount}";
         }
+
+        private void Image_SourceUpdated(object sender, DataTransferEventArgs e)
+        {
+
+        }
+
+        private void CookieClickButton_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
 }
 
