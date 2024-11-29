@@ -11,6 +11,7 @@ namespace CookieClicker
         private int cookieCount = 0;
         private int cookiesPerClick = 1;
         private int passiveIncome = 0;
+        private int level = 1;
 
         // Upgrade costs
         private int doubleClickCost = 50;
@@ -39,6 +40,7 @@ namespace CookieClicker
         private void IncomeTimer_Tick(object sender, EventArgs e)
         {
             cookieCount += passiveIncome;
+            CheckLevelUp(); // Check for level-up condition
             UpdateUI();
         }
 
@@ -49,13 +51,27 @@ namespace CookieClicker
             DoubleClickButton.Content = $"Double Click (Cost: {doubleClickCost})";
             PassiveIncomeButton.Content = $"Passive Income (Cost: {passiveIncomeCost})";
             MegaClickButton.Content = $"Mega Click (Cost: {megaClickCost})";
+            LevelText.Text = $"Level: {level}"; // Update level display
         }
 
         // Button to increment cookies
         private void CookieButton_Click(object sender, RoutedEventArgs e)
         {
             cookieCount += cookiesPerClick;
+            CheckLevelUp(); // Check for level-up condition
             UpdateUI();
+        }
+
+        // Check for level-up condition
+        private void CheckLevelUp()
+        {
+            // Increase level for every 1000 cookies earned
+            int newLevel = (cookieCount / 1000) + 1;
+            if (newLevel > level)
+            {
+                level = newLevel;
+                AddToEventLog($"Congratulations! You've reached Level {level}!");
+            }
         }
 
         // Double click upgrade logic
