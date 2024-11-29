@@ -1,17 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using System.Windows.Threading;
 
 namespace CookieClicker
@@ -31,85 +20,108 @@ namespace CookieClicker
         // Timer for passive income
         private readonly DispatcherTimer incomeTimer;
 
+        // Passive income enabled flag
+        private bool passiveIncomeEnabled = false;
+
         public MainWindow()
         {
             InitializeComponent();
 
-            // Initialize passive income timer
+            // Initialize passive income timer but keep it stopped initially
             incomeTimer = new DispatcherTimer
             {
                 Interval = TimeSpan.FromSeconds(1)
             };
             incomeTimer.Tick += IncomeTimer_Tick;
-            incomeTimer.Start();
         }
 
+        // Passive income logic (called every second)
+        private void IncomeTimer_Tick(object sender, EventArgs e)
+        {
+            cookieCount += passiveIncome;
+            UpdateUI();
+        }
+
+        // Update all UI elements
+        private void UpdateUI()
+        {
+            CookieCountText.Text = $"Cookies: {cookieCount}";
+            DoubleClickButton.Content = $"Double Click (Cost: {doubleClickCost})";
+            PassiveIncomeButton.Content = $"Passive Income (Cost: {passiveIncomeCost})";
+            MegaClickButton.Content = $"Mega Click (Cost: {megaClickCost})";
+        }
+
+        // Button to increment cookies
         private void CookieButton_Click(object sender, RoutedEventArgs e)
         {
-            // Increase cookies based on cookies per click
             cookieCount += cookiesPerClick;
             UpdateUI();
-
         }
-       
+
+        // Double click upgrade logic
         private void DoubleClickButton_Click(object sender, RoutedEventArgs e)
         {
             if (cookieCount >= doubleClickCost)
             {
                 cookieCount -= doubleClickCost;
                 cookiesPerClick *= 2;
-                doubleClickCost *= 2; // Increase cost
-                DoubleClickButton.Content = $"Double Click (Cost: {doubleClickCost})";
+                doubleClickCost *= 2; // Increase cost for the next purchase
+                AddToEventLog("You bought Double Click!");
                 UpdateUI();
+            }
+            else
+            {
+                AddToEventLog("Not enough cookies for Double Click.");
             }
         }
 
+        // Passive income upgrade logic
         private void PassiveIncomeButton_Click(object sender, RoutedEventArgs e)
         {
             if (cookieCount >= passiveIncomeCost)
             {
                 cookieCount -= passiveIncomeCost;
-                passiveIncome += 1;
-                passiveIncomeCost = (int)(passiveIncomeCost * 1.5); // Increase cost
-                PassiveIncomeButton.Content = $"Passive Income (Cost: {passiveIncomeCost})";
+                passiveIncome += 1; // Increment passive income
+
+                if (!passiveIncomeEnabled)
+                {
+                    // Start passive income only after the first purchase
+                    incomeTimer.Start();
+                    passiveIncomeEnabled = true;
+                }
+
+                passiveIncomeCost = (int)(passiveIncomeCost * 1.5); // Increase cost for the next purchase
+                AddToEventLog("You bought Passive Income!");
                 UpdateUI();
+            }
+            else
+            {
+                AddToEventLog("Not enough cookies for Passive Income.");
             }
         }
 
+        // Mega click upgrade logic
         private void MegaClickButton_Click(object sender, RoutedEventArgs e)
         {
             if (cookieCount >= megaClickCost)
             {
                 cookieCount -= megaClickCost;
-                cookiesPerClick += 10;
-                megaClickCost *= 2; // Increase cost
-                MegaClickButton.Content = $"Mega Click (Cost: {megaClickCost})";
+                cookiesPerClick += 10; // Add 10 cookies per click
+                megaClickCost *= 2; // Increase cost for the next purchase
+                AddToEventLog("You bought Mega Click!");
                 UpdateUI();
+            }
+            else
+            {
+                AddToEventLog("Not enough cookies for Mega Click.");
             }
         }
 
-        private void IncomeTimer_Tick(object sender, EventArgs e)
+        // Log events to the EventLog control
+        private void AddToEventLog(string message)
         {
-            // Add passive income every second
-            cookieCount += passiveIncome;
-            UpdateUI();
-        }
-
-        private void UpdateUI()
-        {
-            // Update cookie count text
-            CookieCountText.Text = $"Cookies: {cookieCount}";
-        }
-
-        private void Image_SourceUpdated(object sender, DataTransferEventArgs e)
-        {
-
-        }
-
-        private void CookieClickButton_Click(object sender, RoutedEventArgs e)
-        {
-
+            EventLog.Items.Add($"{DateTime.Now:T}: {message}");
+            EventLog.ScrollIntoView(EventLog.Items[EventLog.Items.Count - 1]); // Auto-scroll to the latest log
         }
     }
 }
-
